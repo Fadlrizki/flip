@@ -9,6 +9,7 @@ import requests
 import random
 import string
 from typing import Optional
+import os
 
 # ====================== SETUP DATABASE ======================
 DATABASE_URL = "sqlite:////app/data/pokemon.db"
@@ -28,7 +29,7 @@ class AbilityEntry(Base):
     id = Column(Integer, primary_key=True, index=True)
     raw_id = Column(String, index=True)
     user_id = Column(String)
-    pokemon_ability_id = Column(String)
+    pokemon_ability_id = Column(Integer)
     effect = Column(Text)
     short_effect = Column(Text)
     language_name = Column(String)
@@ -42,8 +43,7 @@ app = FastAPI(title="Pokemon Ability Processor")
 # ====================== STARTUP EVENT ======================
 @app.on_event("startup")
 def startup_event():
-    import os
-    os.makedirs("/app/data", exist_ok=True)   # Pastikan folder ada
+    os.makedirs("/app/data", exist_ok=True)   
     Base.metadata.create_all(bind=engine)
     print("✅ Database connected and tables created successfully!")
 
@@ -108,7 +108,6 @@ def process_ability(request: AbilityRequest):
         
         db.commit()
 
-        # Ambil data yang disimpan
         saved_entries = db.query(AbilityEntry).filter(AbilityEntry.raw_id == raw_id).all()
 
         returned_entries = [
